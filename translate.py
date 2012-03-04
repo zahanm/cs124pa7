@@ -25,6 +25,7 @@ def word_translate(fwords):
           if span:
             translated = span.get_text()
         print(word.strip(), '\t', translated)
+        print(word.strip(), '\t', translated, file=sys.stderr)
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
