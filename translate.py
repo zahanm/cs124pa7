@@ -6,20 +6,24 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-url = 'http://hindi-english.org/index.php?input={0}&trans=Translate&direction=AU'
+hineng = 'http://hindi-english.org/index.php?input={0}&trans=Translate&direction=AU'
+shabdkosh = 'http://www.shabdkosh.com/s?e={0}'
 
 def word_translate(fwords):
   with open(fwords) as f:
     for word in f:
       if len(word.strip()):
-        site_stream = urllib2.urlopen(url.format(word.strip()))
+        site_stream = urllib2.urlopen(shabdkosh.format(word.strip()))
         html = ''.join([ line for line in site_stream ])
         # print(html)
         soup = BeautifulSoup(html)
-        tbodies = soup.find_all('a', { 'class': 'stil4' })
         translated = ''
-        if len(tbodies) >= 1:
-          translated = tbodies[1].get_text()
+        ol = soup.find('ol', { 'class': 'eirol' })
+        if ol:
+          # import pdb; pdb.set_trace()
+          span = ol.find('span', { 'class': 'en l' })
+          if span:
+            translated = span.get_text()
         print(word.strip(), '\t', translated)
 
 if __name__ == '__main__':
