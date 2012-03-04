@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 url = 'http://hindi-english.org/index.php?input={0}&trans=Translate&direction=AU'
 
 def word_translate(fwords):
-  with open(fwords) as f, open('output','w') as out:
+  with open(fwords) as f:
     for word in f:
       if len(word.strip()):
         site_stream = urllib2.urlopen(url.format(word.strip()))
@@ -17,7 +17,10 @@ def word_translate(fwords):
         # print(html)
         soup = BeautifulSoup(html)
         tbodies = soup.find_all('a', { 'class': 'stil4' })
-        print(tbodies[1].get_text())
+        translated = ''
+        if len(tbodies) >= 1:
+          translated = tbodies[1].get_text()
+        print(word.strip(), '\t', translated)
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
