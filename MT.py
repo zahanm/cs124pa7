@@ -56,11 +56,13 @@ def runPosTagger(filename,path):
 def transformSentence(s):
   s = cleanCaseMarkers(s)
   s = reversePostpositions(s)
+  s = moveVerb(s)
   return s
 
 
 def cleanCaseMarkers(s):
-  s = re.sub(r" (KE|NE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
+  s = re.sub(r" (KE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
+  s = re.sub(r" NE_[A-Z]+ "," NE_NE ",s)
   s = re.sub(r" KE_MARK (\w+_(?:IN|TO)) "," \\1 ",s)
   s = re.sub(r" (?:KA|KE)_MARK "," 's ",s)
   return s
@@ -68,7 +70,7 @@ def cleanCaseMarkers(s):
 
 def reversePostpositions(s):
   words = s.split(" ")
-  nounThings = set(["CD","NN","NNP","JJ","DT","FW","MARK"])
+  nounThings = set(["CD","NN","NNP","JJ","DT","FW","MARK",":"])
   toReturn = ""
   currentPhrase = ""
 
@@ -85,6 +87,46 @@ def reversePostpositions(s):
       currentPhrase = ""
 
   return toReturn
+
+
+def moveVerb(s):
+  words = s.split()
+  i = 0
+  while i < len(words):
+    while i < len(words) and isNounPhrase(words[:i+1]):
+      i += 1
+    if i >= len(words):
+      break
+    rest, nexti = suckUpVerb(words[i:])
+    words = words[:i] + rest
+    i += nexti
+  return ' '.join(words)
+
+
+def suckUpVerb(words):
+  i = 0
+  while i < len(words):
+    if re.match("VB.", POS(words[i])):
+      if i+1 < len(words) and re.match("NN.",POS(words[i+1])):
+        return ([words[i], words[i+1]] + words[:i] + words[i+2:], i+2)
+      return ([ words[i] ] + words[:i] + words[i+1:], i+1)
+    i += 1
+  return (words + ['No-verb-found!'], i+2)
+
+
+def isNounPhrase(words):
+  nnFound = False
+  onlyOKbeforeNoun = set(["DT","JJ"])
+  nounLabels = set(["NN","NNP"])
+  for word in words:
+    if POS(word) in nounLabels:
+      nnFound = True
+    if POS(word) not in onlyOKbeforeNoun | nounLabels:
+      return False
+    if nnFound and POS(word) in onlyOKbeforeNoun:
+      return False
+  return True
+
 
 
 def POS(word):
