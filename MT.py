@@ -118,8 +118,8 @@ def suckUpVerb(words):
 
 def isNounPhrase(words):
   nnFound = False
-  onlyOKbeforeNoun = set(["DT","IN","TO","JJ","NNP"])
-  nounLabels = set(["NN","NNP","FW","POS",",","CC"])
+  onlyOKbeforeNoun = set(["DT","TO","JJ","NNP"])
+  nounLabels = set(["NN","NNP","FW","POS",",","CC","IN"])
   nnFoundReversers = set([",","POS","CC"])
   for word in words:
     if nnFound and POS(word) in onlyOKbeforeNoun:
@@ -155,7 +155,7 @@ if __name__ == '__main__':
   for sentence in sentences:
     print sentence
   
-  outfile = open('output','w')
+  outfile = open('outputSoFar','w')
   for sentence in sentences:
     outfile.write("%s.\n" % sentence)
   outfile.close()
