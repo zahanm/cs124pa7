@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 def readDictFromFile(filename):
   toReturn = dict()
@@ -33,35 +34,71 @@ def translateWords(sentences,dictionary):
   return newSentences
 
 
-def posTagSentences(sentences,filename='sentences'):
+def posTagSentences(sentences,path,filename='sentences'):
   outfile = open(filename,'w')
   for sentence in sentences:
-    outfile.write("%s\n" % sentence)
+    outfile.write("%s.\n" % sentence)
   outfile.close()
   
-  runPosTagger(filename)
-  return readTextFromFile(filename)
+  runPosTagger(filename,path)
+  return readTextFromFile(filename+"-tag")
 
 
-def runPosTagger(filename):
-  pass
+def runPosTagger(filename,path):
+  if not path[-1] == '/':
+    path += '/'
+  os.system("java -mx600m -classpath "+path+"stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model "+path+"models/english-bidirectional-distsim.tagger -textFile "+filename+" > " + filename + "-tag")
+
 
 def transformSentence(s):
+  s = cleanCaseMarkers(s)
+  s = reversePostpositions(s)
   return s
-  
+
+
+def cleanCaseMarkers(s):
+  s = re.sub(r" (KE|NE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
+  s = re.sub(r" KE_MARK (\w+_IN) "," \\1 ",s)
+  return s
+
+
+def reversePostpositions(s):
+  words = s.split(" ")
+  nounThings = set(["CD","NN","NNP","JJ","DT","FW"])
+  toReturn = ""
+  currentPhrase = ""
+
+  for word in words:
+    if POS(word) in nounThings:
+      currentPhrase += word + " "
+    elif POS(word) == "IN":
+      toReturn += word + " "
+      toReturn += currentPhrase
+      currentPhrase = ""
+    elif POS(word) not in nounThings:
+      currentPhrase += word + " "
+      toReturn += currentPhrase
+      currentPhrase = ""
+
+  return toReturn
+
+
+def POS(word):
+  return word.split("_")[-1]
 
 if __name__ == '__main__':
-  if len(sys.argv) != 3:
-    print('usage: {0} <text_file> <dictionary_file>'.format(__file__))
+  if len(sys.argv) != 4:
+    print('usage: {0} <text_file> <dictionary_file> path/to/postagger/'.format(__file__))
     sys.exit(1)
   textFilename = sys.argv[1]
   dictFilename = sys.argv[2]
+  posPath = sys.argv[3]
 
   wordDictionary = readDictFromFile(dictFilename)
   sentences = readTextFromFile(textFilename)
   
   sentences = translateWords(sentences,wordDictionary)
-  sentences = posTagSentences(sentences)
+  sentences = posTagSentences(sentences,posPath)
   sentences = [transformSentence(s) for s in sentences]
 
   for sentence in sentences:
