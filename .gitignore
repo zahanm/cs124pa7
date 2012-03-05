@@ -1,6 +1,7 @@
 
 *.pyc
 
+sentences-tag
 local
 output
-
+stanford-*

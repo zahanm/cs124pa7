@@ -22,13 +22,16 @@ def readTextFromFile(filename):
 
 def translateWords(sentences,dictionary):
   newSentences = []
-  for sentence in sentences:
+  for i, sentence in enumerate(sentences):
     newSentence = ""
     for word in sentence.strip().split(" "):
       if word == ',' or word == '-':
         newSentence = newSentence + word
       else:
-        newSentence = newSentence + dictionary[word]
+        try:
+          newSentence = newSentence + dictionary[word]
+        except KeyError:
+          import pdb; pdb.set_trace()
       newSentence = newSentence + " "
     newSentences.append(newSentence)
   return newSentences
@@ -58,13 +61,14 @@ def transformSentence(s):
 
 def cleanCaseMarkers(s):
   s = re.sub(r" (KE|NE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
-  s = re.sub(r" KE_MARK (\w+_IN) "," \\1 ",s)
+  s = re.sub(r" KE_MARK (\w+_(?:IN|TO)) "," \\1 ",s)
+  s = re.sub(r" (?:KA|KE)_MARK "," 's ",s)
   return s
 
 
 def reversePostpositions(s):
   words = s.split(" ")
-  nounThings = set(["CD","NN","NNP","JJ","DT","FW"])
+  nounThings = set(["CD","NN","NNP","JJ","DT","FW","MARK"])
   toReturn = ""
   currentPhrase = ""
 
