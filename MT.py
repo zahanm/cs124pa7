@@ -55,8 +55,8 @@ def runPosTagger(filename,path):
 
 def transformSentence(s):
   s = cleanCaseMarkers(s)
-  s = reversePostpositions(s)
   s = moveVerb(s)
+  s = reversePostpositions(s)
   return s
 
 
@@ -118,14 +118,17 @@ def suckUpVerb(words):
 
 def isNounPhrase(words):
   nnFound = False
-  onlyOKbeforeNoun = set(["DT","IN","TO","JJ"])
-  nounLabels = set(["NN","NNP","FW","POS"])
+  onlyOKbeforeNoun = set(["DT","IN","TO","JJ","NNP"])
+  nounLabels = set(["NN","NNP","FW","POS",",","CC"])
+  nnFoundReversers = set([",","POS","CC"])
   for word in words:
+    if nnFound and POS(word) in onlyOKbeforeNoun:
+      return False
     if POS(word) in nounLabels:
       nnFound = True
+    if POS(word) in nnFoundReversers:
+      nnFound = False
     if POS(word) not in onlyOKbeforeNoun | nounLabels:
-      return False
-    if nnFound and POS(word) in onlyOKbeforeNoun:
       return False
   return True
 
@@ -151,4 +154,8 @@ if __name__ == '__main__':
 
   for sentence in sentences:
     print sentence
-
+  
+  outfile = open('output','w')
+  for sentence in sentences:
+    outfile.write("%s.\n" % sentence)
+  outfile.close()
