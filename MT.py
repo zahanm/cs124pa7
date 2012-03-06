@@ -121,7 +121,12 @@ def moveVerb(s):
   words = s.split()
   i = 0
   while i < len(words):
-    while i < len(words) and isNounPhrase(words[:i+1]):
+    nounPhraseFound = False
+    while i < len(words):
+      if isNounPhrase(words[:i+1]):
+        nounPhraseFound = True
+      elif nounPhraseFound:
+        break
       i += 1
     if i >= len(words):
       break
