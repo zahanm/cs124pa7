@@ -61,7 +61,12 @@ def transformSentence(s):
   return s
 
 def supplementalCaseStuff(s):
-  s = re.sub(r" NE_NE "," did_VBD ",s)
+  words = s.split()
+  if 'NE_NE' in words and 'did_VBD' in words[-2:]:
+    did_pos = -2 + words[-2:].index('did_VBD')
+    del words[did_pos] # remove did
+    words[words.index('NE_NE')] = 'did_VBD'
+  s = ' '.join(words)
   s = re.sub(r" KO_MARK "," ",s)
   return s
 
@@ -119,7 +124,8 @@ def suckUpVerb(words):
         return ([words[i], words[i+1]] + words[:i] + words[i+2:], i+2)
       return ([ words[i] ] + words[:i] + words[i+1:], i+1)
     i += 1
-  return (words + ['No-verb-found!'], i+2)
+  # no verb found
+  return (words, i+1)
 
 
 def isNounPhrase(words):
