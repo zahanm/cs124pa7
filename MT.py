@@ -56,6 +56,7 @@ def runPosTagger(filename,path):
   os.system("java -mx600m -classpath "+path+"stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model "+path+"models/english-bidirectional-distsim.tagger -textFile "+filename+" > " + filename + "-tag")
 
 hindi_names = frozenset(['Kabir', 'Kashi', 'Rāmānaṁda'])
+prepositions = frozenset(['in_opposition_to'])
 
 def correctPosTags(sentences):
   for i, s in enumerate(sentences):
@@ -63,6 +64,8 @@ def correctPosTags(sentences):
     for j, w in enumerate(words):
       if POSless_word(w) in hindi_names:
         words[j] = POSless_word(w) + '_NNP'
+      elif POSless_word(w) in prepositions:
+        words[j] = POSless_word(w) + '_IN'
     sentences[i] = ' '.join(words)
   return sentences
 
@@ -159,7 +162,7 @@ def isNounPhrase(words):
   return True
 
 def POSless_word(word):
-  return word.split('_')[0]
+  return '_'.join(word.split('_')[:-1])
 
 def POS(word):
   return word.split("_")[-1]
