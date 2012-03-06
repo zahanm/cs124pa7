@@ -5,4 +5,5 @@ sentences
 sentences-tag
 local
 output
+outputSoFar
 stanford-*
