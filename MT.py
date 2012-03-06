@@ -57,8 +57,13 @@ def transformSentence(s):
   s = cleanCaseMarkers(s)
   s = moveVerb(s)
   s = reversePostpositions(s)
+  s = supplementalCaseStuff(s)
   return s
 
+def supplementalCaseStuff(s):
+  s = re.sub(r" NE_NE "," did ",s)
+  s = re.sub(r" KO_MARK "," ",s)
+  return s
 
 def cleanCaseMarkers(s):
   s = re.sub(r" (KE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
@@ -104,12 +109,12 @@ def moveVerb(s):
 
 
 def suckUpVerb(words):
-  nounLabels = set(["NN","NNP"])
+  followers = set(["NN","NNP","VBN","VBD"])
   i = 0
   while i < len(words):
     if re.match("VB.", POS(words[i])):
       # import pdb; pdb.set_trace()
-      if i+1 < len(words) and POS(words[i+1]) in nounLabels:
+      if i+1 < len(words) and POS(words[i+1]) in followers:
         return ([words[i], words[i+1]] + words[:i] + words[i+2:], i+2)
       return ([ words[i] ] + words[:i] + words[i+1:], i+1)
     i += 1
@@ -118,8 +123,8 @@ def suckUpVerb(words):
 
 def isNounPhrase(words):
   nnFound = False
-  onlyOKbeforeNoun = set(["DT","TO","JJ","NNP"])
-  nounLabels = set(["NN","NNP","FW","POS",",","CC","IN"])
+  onlyOKbeforeNoun = set(["DT","JJ","NNP"])
+  nounLabels = set(["NN","NNP","FW","POS",",","CC","IN","TO"])
   nnFoundReversers = set([",","POS","CC"])
   for word in words:
     if nnFound and POS(word) in onlyOKbeforeNoun:
@@ -159,3 +164,4 @@ if __name__ == '__main__':
   for sentence in sentences:
     outfile.write("%s.\n" % sentence)
   outfile.close()
+
