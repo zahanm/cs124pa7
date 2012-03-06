@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -76,17 +76,17 @@ def transformSentence(s):
 
 def supplementalCaseStuff(s):
   words = s.split()
-  if 'NE_NE' in words and 'did_VBD' in words[-2:]:
+  if 'NE_IN' in words and 'did_VBD' in words[-2:]:
     did_pos = -2 + words[-2:].index('did_VBD')
     del words[did_pos] # remove did
-    words[words.index('NE_NE')] = 'did_VBD'
+    del words[words.index('NE_IN')]
   s = ' '.join(words)
   s = re.sub(r" KO_MARK "," ",s)
   return s
 
 def cleanCaseMarkers(s):
   s = re.sub(r" (KE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
-  s = re.sub(r" NE_[A-Z]+ "," NE_NE ",s)
+  s = re.sub(r" NE_[A-Z]+ "," NE_IN ",s)
   s = re.sub(r" KE_MARK (\w+_(?:IN|TO)) "," \\1 ",s)
   s = re.sub(r" KA_MARK (\w+_(?:VB.?)) "," to_IN \\1 ",s)
   s = re.sub(r" (?:KA|KE)_MARK "," 's_POS ",s)
