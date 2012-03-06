@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys
 import os
 import re
@@ -44,13 +46,25 @@ def posTagSentences(sentences,path,filename='sentences'):
   outfile.close()
   
   runPosTagger(filename,path)
-  return readTextFromFile(filename+"-tag")
+  sentences = readTextFromFile(filename+"-tag")
+  return correctPosTags(sentences)
 
 
 def runPosTagger(filename,path):
   if not path[-1] == '/':
     path += '/'
   os.system("java -mx600m -classpath "+path+"stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model "+path+"models/english-bidirectional-distsim.tagger -textFile "+filename+" > " + filename + "-tag")
+
+hindi_names = frozenset(['Kabir', 'Kashi', 'Rāmānaṁda'])
+
+def correctPosTags(sentences):
+  for i, s in enumerate(sentences):
+    words = s.split()
+    for j, w in enumerate(words):
+      if POSless_word(w) in hindi_names:
+        words[j] = POSless_word(w) + '_NNP'
+    sentences[i] = ' '.join(words)
+  return sentences
 
 
 def transformSentence(s):
@@ -144,7 +158,8 @@ def isNounPhrase(words):
       return False
   return True
 
-
+def POSless_word(word):
+  return word.split('_')[0]
 
 def POS(word):
   return word.split("_")[-1]
