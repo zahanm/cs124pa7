@@ -61,7 +61,7 @@ def transformSentence(s):
   return s
 
 def supplementalCaseStuff(s):
-  s = re.sub(r" NE_NE "," did ",s)
+  s = re.sub(r" NE_NE "," did_VBD ",s)
   s = re.sub(r" KO_MARK "," ",s)
   return s
 
@@ -69,9 +69,10 @@ def cleanCaseMarkers(s):
   s = re.sub(r" (KE|KO|KA|ME)_[A-Z]+ "," \\1_MARK ",s)
   s = re.sub(r" NE_[A-Z]+ "," NE_NE ",s)
   s = re.sub(r" KE_MARK (\w+_(?:IN|TO)) "," \\1 ",s)
+  s = re.sub(r" KA_MARK (\w+_(?:VB.?)) "," to_IN \\1 ",s)
   s = re.sub(r" (?:KA|KE)_MARK "," 's_POS ",s)
-  return s
 
+  return s
 
 def reversePostpositions(s):
   words = s.split(" ")
