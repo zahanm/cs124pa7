@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import sys
 import os
 import re
@@ -10,7 +12,7 @@ def readDictFromFile(filename):
   for i, line in enumerate(dictFile):
     lineParts = line.strip().split("\t")
     if len(lineParts) > 2:
-      print "Beware! Weird formatting on line " + str(i) + "!"
+      print("Beware! Weird formatting on line " + str(i) + "!")
     toReturn[lineParts[0]] = lineParts[1]
   dictFile.close()
   return toReturn
@@ -172,6 +174,28 @@ def POSless_word(word):
 def POS(word):
   return word.split("_")[-1]
 
+def build_ictionary():
+  import urllib2
+  from bs4 import BeautifulSoup
+  hineng = 'http://hindi-english.org/index.php?input={0}&trans=Translate&direction=AU'
+  shabdkosh = 'http://www.shabdkosh.com/s?e={0}'
+  with open('hindi-words') as f:
+    for word in f:
+      if len(word.strip()):
+        site_stream = urllib2.urlopen(shabdkosh.format(word.strip()))
+        html = ''.join([ line for line in site_stream ])
+        # print(html)
+        soup = BeautifulSoup(html)
+        translated = ''
+        ol = soup.find('ol', { 'class': 'eirol' })
+        if ol:
+          # import pdb; pdb.set_trace()
+          span = ol.find('span', { 'class': 'en l' })
+          if span:
+            translated = span.get_text()
+        print(word.strip(), '\t', translated)
+        print(word.strip(), '\t', translated, file=sys.stderr)
+
 if __name__ == '__main__':
   if len(sys.argv) != 4:
     print('usage: {0} <text_file> <dictionary_file> path/to/postagger/'.format(__file__))
@@ -188,7 +212,7 @@ if __name__ == '__main__':
   sentences = [transformSentence(s) for s in sentences]
 
   for sentence in sentences:
-    print sentence
+    print(sentence)
   
   outfile = open('outputSoFar','w')
   for sentence in sentences:
