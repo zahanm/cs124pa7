@@ -1,3 +1,152 @@
-Richard Futrell
-Zahan Malkani
+﻿CS 124: PA 7
+Richard Futrell and Zahan Malkani
 
+The F Language: Hindi
+Hindi stands apart from many other choices for a source language in just how different many aspects of its grammar are from English. Some of the characteristics that play a role in striving for fluency and fidelity in the translations are:
+1. Head finality:
+Prepositions in Hindi are turned into postpositions, where they follow the noun phrases, unlike English. Similarly, verbs are found at the end of the sentences.
+NE, ME, KO, PAR, SE: are some of the common prepositions
+2. Genders: ka, ke, ki
+Like almost all Indo-European languages there are gender and plural markings everywhere. This shouldn’t have much of an effect though, as we throw this information away apart from mistakes in pronoun genders.
+3. Case markers
+These mark grammatical functions of noun phrases in Hindi, but there really is no English equivalent. We use these in our rules however to make some deductions about the placement of phrases.
+
+
+
+
+Original Test Document: Hindi
+काशी के इस अक्खड़ , निडर एवं संत कवि का जन्म लहरतारा के पास सन् १३९८ में ज्येष्ठ पूर्णिमा को हुआ | जुलाहा परिवार में पालन पोषण हुआ , संत रामानंद के शिष्य बने और अलख जगाने लगे | कबीर सधुक्कड़ी भाषा में किसी भी सम्प्रदाय और रूढ़ियों की परवाह किये बिना खरी बात कहते थे | कबीर ने हिंदू-मुसलमान सभी समाज में व्याप्त रूढ़िवाद तथा कट्टरपंथ का खुलकर विरोध किया | कबीर की वाणी उनके मुखर उपदेश उनकी साखी , रमैनी , बीजक , बावन - अक्षरी , उलटबासी में देखें जा सकते हैं | गुरु_रंथ_साहब में उनके २०० पद और २५० साखियां हैं
+काशी में प्रचलित मान्यता है कि जो यहॉ मरता है उसे मोक्ष प्राप्त होता है | रूढ़ि के विरोधी कबीर को यह कैसे मान्य होता | काशी छोड़ मगहर चले गये और सन् १५१८ के आस_पास वहीं देह त्याग किया | मगहर में कबीर की समाधि है जिसे हिन्दू-मुसलमान दोनों पूजते हैं |
+
+
+For those of you who cannot read Hindi, this passage talks about the life of the poet ‘Kabir Das’. It was taken from the first section of the Hindi article on Wikipedia: http://hi.wikipedia.org/wiki/%E0%A4%B8%E0%A4%82%E0%A4%A4_%E0%A4%95%E0%A4%AC%E0%A5%80%E0%A4%B0 
+
+
+It essentially talks about his life, from birth in the city of Kashi to some his achievements. It also talks a fair amount of his perception by the public, and how he is thought of today.
+
+
+Output of our System: Pre-transformed Literal Translation
+Kashi KE such bumptious , bold and saint bard KA birth Laharatārā KE near around 1398 in superior full_moon KO happened .
+clothier family in aid nutrition happened , saint Rāmānaṁda KE apprentice was made and invisible awakening toward .
+Kabir sadhukkaḍī language in certain also community and conservatives KE attention did sans kharī business says were .
+Kabir NE Hindu-Muslim everybody brotherhood in prevalent conservatism and hardline KA opened opposition did .
+Kabir KE voice his mukhara admonition hers witness , ramainī , invoice_book , fifty-two - syllabed , ulaṭabāsī in saw go can are .
+Guru_Grunth_Sahib in his 200 appointment and 250 witnesses are .
+Kashi in continuous recognition is that if here fill is her enlightenment accession happens is .
+conservative KE in_opposition_to Kabir KO this how respected happens .
+Kashi leave Magahara go gone and around 1598 KE near same_place body relinquishment did .
+Magahara in Kabir KE sepulcher is whom Hindu-Muslim both celebrated are .
+
+Output of our System: After Applying our Rules
+Kashi's such bumptious , bold and saint bard's birth happened near Laharatārā around in 1398 superior full moon .
+In clothier family aid nutrition happened , saint Rāmānaṁda's apprentice was made and toward invisible awakening .
+In Kabir sadhukkaḍī language did certain also community and conservatives's attention sans kharī business says were .
+Kabir in Hindu-Muslim everybody brotherhood opened opposition prevalent conservatism and to hardline .
+Kabir's voice his mukhara admonition hers witness , ramainī , invoice book , fifty-two - syllabed , in ulaṭabāsī saw go can are .
+In Guru Grunth Sahib are his 200 appointment and 250 witnesses .
+In Kashi is that continuous recognition if here fill is her enlightenment accession happens is .
+In opposition to conservative happens Kabir this how respected .
+Kashi leave Magahara go gone and around near 1598 same place body relinquishment did .
+In Magahara is Kabir's sepulcher whom Hindu-Muslim both celebrated are .
+
+
+The Transformation Rules:
+There are many.
+We run the following transformations, in order:
+
+
+   1. First, we tag the word-to-word translation with the Stanford bidirectional English part-of-speech tagger
+We’ve made some modifications to this step; the particles (NE, ME, KO, PAR, SE, KA, KE, KI, KE LIYE) are not translated per se into English words, just transliterated. We handle them in our rules later on.
+
+   2. Then, we make some corrections to the generated tags, marking some Indian names as proper nouns and some other edge cases: this is necessary so that these words are handled properly by the rules we came up with
+
+   3. We then mark the special case markers in Hindi with a custom part of speech, so that they can be used later on
+
+   4. We eliminate KEs followed by prepositions
+The KE does not add any information in that case in Hindi
+‘ke paas’ in Hindi just means ‘near’, as in the first sentence. ‘Near Lahartara’.
+
+   5. Any KAs followed by verbs are changed to ‘to verb_word’
+For instance in ‘KA opened opposition’
+This should roughly correspond to ‘opposed to’
+
+   6. Finally, any remaining KA, KE, KI is changed into an “ ‘s ”
+‘bard KA birth’ translates into “ bard’s birth ”
+
+   7. Next we undertake the great verb move: we scan each sentence from left to right for noun phrases or prepositional phrases. As we find each, we take the next verb from the sentence, and deposit it after the found phrase. We continue our search from where the verb was found.
+The word ‘happened’ appears at the end of the first sentence, where it would be found in a head final language. In order to correct this, it is moved and left after the ‘bard’s birth’, where it makes more sense in English.
+
+   8. Reverse post positions: It scans for post-positions, and then moves them in front of what we identified as the most recent noun / prepositional phrase.
+Again, from our first sentence ‘Laharatārā KE near’ is transformed after these rules to ‘near Laharatara’, as an English speaker would phrase it.
+
+   9. With any remaining NE prepositions, we turn then into ‘did’ and eliminate the trailing did that our word-by-word translation might have produced at the end of the sentence.
+‘Kabir NE’ literally means ‘Kabir did’, but we could not do a direct translation since our system also translates ‘HUA’ at the end of the sentence to ‘did’.
+
+   10. Finally, we eliminate any remaining KOs, since they have expired their usefulness.
+
+
+
+Error Analysis
+        The overwhelming source of errors in the final translation is the initial word-by-word translation, both because the wrong translation was selected and because in some cases no good translation exists. Many errors also arise from shortcomings in the word reordering rules. 
+
+
+"Kashi's such bumptious, bold and saint bard's birth happened near Laharatārā around in 1398 superior full moon." 
+The trailing noun phrase "superior full moon" was originally marked with the case maker KO, which in this case marks the phrase as a descriptive adverbial. However, it is not possible to distinguish this usage of KO from the more frequent usage as a direct object marker. In order to keep the translation of KO correct on average, we simply deleted it, resulting in an awkward translation here.
+
+
+"in clothier family aid nutrition happened, saint Rāmānaṁda's apprentice was made and toward invisible awakening." 
+The awkward "aid nutrition happened" is due to the word-by-word translator's propensity to translate verbs as nouns, and to translate final verbal particles as "happens" or "did" or the like. It might be preferable for "was made" to move in front of "saint Ramananda", but the verb movement rule always moves the verb after the first noun phrase. In general this results in the correct placement but here it does not. "Toward invisible awakening" seems to lack a verb, but none is present in the word-by-word translation.
+
+
+"in Kabir sadhukkaḍī language did certain also community and conservatives's attention sans kharī business says were." 
+The word-by-word translation has distorted this sentence beyond repair.
+        
+"Kabir in Hindu-Muslim everybody brotherhood opened opposition prevalent conservatism and to hardline." 
+This sentence states that Kabir opened opposition to the prevalent conservatism in Hindu-Muslim communities ("everybody brotherhood"). It would be preferable if the sentence read "...opened opposition TO prevalent conservatism and hardline". However, the rule for moving postpositions does not properly detect  the NP, because it only searches for a line of words with parts of speech JJ, DT, or NN.?, and stops at CC. If it considered the CC to part of the noun phrase, it would have no way of knowing that opposition was not part of the following phrase opposition, thus generating "opened to opposition prevalent". An improved NP detector for postposition movement, one that mirrored the system used for verb movement, would be the first priority in an improved system.
+
+
+"Kabir's voice his mukhara admonition hers witness, ramainī, invoice book, fifty-two- syllabed, in ulaṭabāsī saw go can are." This sentence is irretrievable.
+
+
+"in guru_grunth_sahib are his 200 appointment and 250 witnesses." 
+Since Kabir Das is a poet and the Guru Granth Sahib is a book of poems, it is likely that the Hindi behind "appointment" and "witness" actually refers to kinds of poems. It would probably take topic-aware word sense disambiguation to resolve these words to the correct senses.
+
+
+"in Kashi is that continuous recognition if here fill is her enlightenment accession happens is."
+        Here "that", mis-tagged as a preposition, follows the postposition reordering rule and mistakenly moves to the position after "is". Improved POS tagging would avoid this. This sentence has many embedded clauses, each with a verb inside; the multitude of verbs confuses the verb reordering rule and results in the odd placements of "is" and the trailing verbs "happens is". A smarter noun phrase detector for the verb movement rule might avoid this confusion.
+
+
+"in opposition to conservative happens Kabir this how respected." Three separate Hindi speakers could not decipher the meaning of the Hindi sentence that resulted in this translation, so error analysis is difficult.
+
+
+"Kashi leave Magahara go gone and around near 1598 same place body relinquishment did."
+        "Go gone" results from faulty translations of Hindi verbal particles. "Body relinquishment did" results from the word-by-word translator's translating the verb "relinquish" as the noun "relinquishment". The original text had Kashi going TO Magahara, rather than leaving. Context-sensitive word translation is necessary to resolve these issues.
+
+
+"in Magahara is Kabir's sepulcher whom Hindu-Muslim both celebrated are."
+        "Whom" should be "which", and the verbal particle translated as "are" should likely not have been translated at all. 
+
+
+Google Translate
+Google output: Kashi, the proud, fearless and saint-poet born Lhrtara full moon is the eldest of the year 1398. Weaver was brought up in the family, became a disciple of Sant Ramanand Alakh began to awaken. Kabir Sdhukkdi language and customs in any community regardless of the idol. Kabir the Hindu - Muslim fundamentalism and fundamentalism prevalent in all societies openly opposed. Kabir says his friend of his outspoken sermons, Rmaini, invoices, fifty-two - syllabled, Ultbasi can look at. There are 200 posts and 250 Sakian Rnth master in law. Lore has it that those who die in Kashi attain salvation is here. How valid is this tradition of anti-Kabir. Kashi Maghar went up and around the year 1518 the body was discarded. Maghar Kabir Samadhi in the Hindu - Muslims worship.
+
+
+Google produces a text that overall sounds like better English, since it uses English langauge models to select the translation. For example:
+Our translation => Google's translation
+is that continuous recognition => Lore has it that
+her enlightenment accession happens => those who die in Kashi attain salvation
+toward invisible awakening => began to awaken
+such bumptious, bold and saint bard => the proud, fearless and saint-poet
+
+
+Google's translation is also free of the extraneous verbs such as "happens" and "did" that resulted from a literal translation of Hindi verb particles. Google avoids this by translating phrases rather than individual words, thus translating a Hindi verb+particle construction as an English verb. It also reorders prepositional phrases more idiomatically, moving them away from the beginning of the sentence.
+
+
+There are some sentences where neither Google nor our system produce a comprehensible translation,  such as Google's "Kabir says his friend of his outspoken sermons, Rmaini, invoices, fifty-two - syllabled, Ultbasi can look at". Both our system and Google also fail to comprehensibly translate the nouns in "There are 200 posts and 250 Sakian Rnth ". These shared errors appear to be due to obscure words.
+
+
+In some cases, Google produces translations that are incorrect. For instance, the sentence translated as "weaver was brought up in the family" should indicate that Kabir was raised in a family of weavers. Our translation, though awkward, captures the correct meaning. Another example is the sentence Google translates as "How valid is this tradition of anti-Kabir"; the original sentence states that Kabir opposed something traditional, not that anything was opposing Kabir. Again, our translation almost captures this more accurate meaning ("in opposition to conservative happens") though it is highly garbled.
+
+
+Responsibilities
+ZM extracted the Hindi-English dictionary from shabdkosh.com. RF and ZM designed and coded the reordering rules. ZM wrote about the language choice and rules; RF wrote about error analysis and the comparison with Google Translate.
